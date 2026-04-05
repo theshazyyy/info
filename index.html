@@ -58,16 +58,18 @@ body::before {
   );
 }
 
-/* Noise grain */
-body::after {
-  content: '';
-  position: fixed;
-  inset: -200%;
-  z-index: 9998;
-  pointer-events: none;
-  opacity: 0.035;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-  animation: grain 0.5s steps(1) infinite;
+/* ========== HERO ========== */
+@media (min-width: 769px) {
+  body::after {
+    content: '';
+    position: fixed;
+    inset: -200%;
+    z-index: 9998;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    animation: grain 0.5s steps(1) infinite;
+  }
 }
 
 @keyframes grain {
@@ -83,7 +85,24 @@ body::after {
   90% { transform: translate(-1%, 1%); }
 }
 
-/* ========== HERO ========== */
+/* Панельные дома — фон hero */
+.hero-buildings {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 55%;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.07;
+}
+
+.hero > *:not(.hero-buildings) {
+  position: relative;
+  z-index: 1;
+}
+
+/* ========== HERO LAYOUT ========== */
 .hero {
   min-height: 100dvh;
   display: flex;
@@ -119,6 +138,7 @@ body::after {
 .glitch-wrap {
   position: relative;
   user-select: none;
+  cursor: pointer;
 }
 
 .glitch {
@@ -131,6 +151,7 @@ body::after {
   position: relative;
   display: block;
   animation: glitch-main 4s infinite;
+  will-change: transform;
 }
 
 .glitch::before,
@@ -145,6 +166,7 @@ body::after {
   letter-spacing: inherit;
   line-height: inherit;
   text-transform: uppercase;
+  will-change: transform, opacity;
 }
 
 .glitch::before {
@@ -192,6 +214,70 @@ body::after {
   88% { transform: translate(0); opacity: 0; }
   93% { transform: translate(5px, 0); opacity: 0.5; }
   94% { transform: translate(-1px, 0); opacity: 0; }
+}
+
+/* Форсированный глитч по клику */
+@keyframes glitch-forced-main {
+  0%   { transform: translate(0); }
+  10%  { transform: translate(-4px, 2px); }
+  20%  { transform: translate(4px, -2px); }
+  30%  { transform: translate(-2px, 0); }
+  40%  { transform: translate(3px, 1px); }
+  50%  { transform: translate(-3px, -1px); }
+  60%  { transform: translate(0); }
+  70%  { transform: translate(2px, 2px); }
+  80%  { transform: translate(-4px, 0); }
+  90%  { transform: translate(2px, -2px); }
+  100% { transform: translate(0); }
+}
+@keyframes glitch-forced-before {
+  0%   { transform: translate(0); opacity: 0; }
+  10%  { transform: translate(-8px, 0); opacity: 1; }
+  25%  { transform: translate(6px, -3px); opacity: 0.8; }
+  40%  { transform: translate(-4px, 2px); opacity: 1; }
+  55%  { transform: translate(5px, 0); opacity: 0.6; }
+  70%  { transform: translate(-6px, -1px); opacity: 0.9; }
+  85%  { transform: translate(3px, 2px); opacity: 0.4; }
+  100% { transform: translate(0); opacity: 0; }
+}
+@keyframes glitch-forced-after {
+  0%   { transform: translate(0); opacity: 0; }
+  15%  { transform: translate(8px, 2px); opacity: 0.9; }
+  30%  { transform: translate(-5px, 0); opacity: 0.7; }
+  45%  { transform: translate(4px, -2px); opacity: 1; }
+  60%  { transform: translate(-6px, 1px); opacity: 0.5; }
+  75%  { transform: translate(3px, 0); opacity: 0.8; }
+  90%  { transform: translate(-2px, -1px); opacity: 0.3; }
+  100% { transform: translate(0); opacity: 0; }
+}
+
+.glitch.forced {
+  animation: glitch-forced-main 0.5s steps(1) !important;
+}
+.glitch.forced::before {
+  animation: glitch-forced-before 0.5s steps(1) !important;
+  opacity: 1;
+}
+.glitch.forced::after {
+  animation: glitch-forced-after 0.5s steps(1) !important;
+  opacity: 1;
+}
+
+/* Мобильная оптимизация анимаций */
+@media (max-width: 768px) {
+  .glitch {
+    animation-duration: 6s;
+  }
+  .glitch::before,
+  .glitch::after {
+    animation-duration: 6s;
+  }
+  @keyframes glitch-main {
+    0%, 88%, 100% { transform: translate(0); }
+    89% { transform: translate(-2px, 1px); }
+    90% { transform: translate(2px, -1px); }
+    91% { transform: translate(0); }
+  }
 }
 
 .hero-subtitle {
@@ -669,111 +755,123 @@ footer {
 }
 
 @media (max-width: 768px) {
-  html {
-    font-size: 1.5rem;
+  /* ── Базовое — нет горизонтального скролла ── */
+  html, body {
     overflow-x: hidden;
-  }
-
-  body {
     max-width: 100vw;
-    overflow-x: hidden;
   }
 
-  .hero,
-  section,
-  .skills-grid,
-  .contact-grid,
-  .osint-banner,
-  .marquee-wrap,
-  footer {
-    max-width: 100vw;
-    width: 100%;
-  }
-
+  /* ── Hero ── */
   .hero {
-    padding: 0 4vw;
+    padding: 0 5vw;
+    width: 100%;
+    box-sizing: border-box;
   }
 
-  .hero-corner {
-    top: 1.5rem;
-    bottom: 1.5rem;
-    left: 4vw;
-    right: 4vw;
-    font-size: 0.55rem;
-    line-height: 1.2;
+  /* Правые корнеры перекрывают текст — скрываем */
+  .hero-corner.tr,
+  .hero-corner.br {
+    display: none;
   }
 
-  .hero-line.h { top: 4rem; }
+  /* Левые корнеры — чуть поднять чтобы не перекрывались */
+  .hero-corner.tl {
+    top: 1.2rem;
+    left: 5vw;
+  }
+
+  .hero-corner.bl {
+    bottom: 1.2rem;
+    left: 5vw;
+  }
+
+  .hero-line.h  { top: 4rem; }
   .hero-line.h2 { bottom: 4rem; }
 
+  /* Subtitle — в столбик чтобы не вылезал за экран */
   .hero-subtitle {
-    gap: 1rem;
-  }
-
-  section {
-    padding: 3rem 4vw;
-  }
-
-  .skills-grid {
+    flex-direction: column;
     gap: 0.5rem;
+    margin-top: 1.5rem;
+  }
+
+  /* Вертикальный scroll-hint справа убираем — перекрывает */
+  .scroll-hint {
+    display: none;
+  }
+
+  /* ── Sections ── */
+  section {
+    padding: 3rem 5vw;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* section-header: убираем flex-gap чтобы title не прыгал */
+  .section-header {
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    margin-bottom: 2rem;
+  }
+
+  /* section-line растягивается на всю ширину при переносе */
+  .section-line {
+    width: 100%;
+    margin-left: 0;
+    flex: none;
+  }
+
+  /* ── Skills ── */
+  .skills-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    width: 100%;
   }
 
   .skills-grid .highlighted-skill {
     grid-column: span 1 !important;
+    padding: 2rem !important;
   }
 
   .skill-cell {
-    padding: 1.5rem;
     min-width: 0;
+    box-sizing: border-box;
   }
 
-  .skill-tag {
-    font-size: 0.78rem;
+  /* ── CTF table — горизонтальный скролл внутри ── */
+  .ctf-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
-  .skill-name {
-    font-size: clamp(1rem, 3vw, 1.3rem);
-  }
-
-  .skill-desc {
-    font-size: 0.98rem;
-  }
-
+  /* ── Contacts ── */
   .contact-grid {
+    grid-template-columns: 1fr;
     max-width: 100%;
+    background: transparent;
+    gap: 1px;
   }
 
-  .contact-cell {
-    padding: 1.4rem 1.5rem;
-  }
-
-  .marquee-wrap {
-    padding: 1rem 0;
-  }
-
-  .marquee-item {
-    font-size: 0.95rem;
-  }
-
-  .ctf-table th,
-  .ctf-table td {
-    font-size: 0.92rem;
-    padding: 0.8rem 0.8rem;
-  }
-
+  /* ── OSINT banner ── */
   .osint-banner {
-    padding: 1.4rem 1.4rem;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
-  .osint-banner::before {
-    left: 1.3rem;
-    top: -0.7rem;
-    font-size: 0.55rem;
+  /* ── Marquee — не выходит за экран ── */
+  .marquee-wrap {
+    max-width: 100vw;
+    overflow: hidden;
   }
 
+  /* ── Footer ── */
   footer {
     flex-direction: column;
     align-items: flex-start;
+    gap: 0.8rem;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .footer-sig {
@@ -795,6 +893,189 @@ footer {
 
 <!-- ========== HERO ========== -->
 <div class="hero" id="sec-0">
+
+  <!-- Панельные дома — фон -->
+  <svg class="hero-buildings" viewBox="0 0 1200 400" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <!-- Дальний план — маленькие здания -->
+    <rect x="0" y="260" width="60" height="140" fill="#EAEAEA"/>
+    <rect x="2" y="272" width="8" height="10" fill="#0A0A0A"/><rect x="14" y="272" width="8" height="10" fill="#0A0A0A"/><rect x="26" y="272" width="8" height="10" fill="#0A0A0A"/><rect x="38" y="272" width="8" height="10" fill="#0A0A0A"/>
+    <rect x="2" y="288" width="8" height="10" fill="#0A0A0A"/><rect x="14" y="288" width="8" height="10" fill="#0A0A0A"/><rect x="26" y="288" width="8" height="10" fill="#0A0A0A"/><rect x="38" y="288" width="8" height="10" fill="#0A0A0A"/>
+    <rect x="2" y="304" width="8" height="10" fill="#0A0A0A"/><rect x="14" y="304" width="8" height="10" fill="#0A0A0A"/><rect x="26" y="304" width="8" height="10" fill="#0A0A0A"/><rect x="38" y="304" width="8" height="10" fill="#0A0A0A"/>
+    <rect x="2" y="320" width="8" height="10" fill="#0A0A0A"/><rect x="14" y="320" width="8" height="10" fill="#0A0A0A"/><rect x="26" y="320" width="8" height="10" fill="#0A0A0A"/><rect x="38" y="320" width="8" height="10" fill="#0A0A0A"/>
+    <rect x="22" y="250" width="16" height="10" fill="#EAEAEA"/><!-- лифт/лестница -->
+
+    <rect x="70" y="220" width="90" height="180" fill="#EAEAEA"/>
+    <rect x="73" y="232" width="12" height="14" fill="#0A0A0A"/><rect x="89" y="232" width="12" height="14" fill="#0A0A0A"/><rect x="105" y="232" width="12" height="14" fill="#0A0A0A"/><rect x="121" y="232" width="12" height="14" fill="#0A0A0A"/><rect x="137" y="232" width="12" height="14" fill="#0A0A0A"/>
+    <rect x="73" y="252" width="12" height="14" fill="#0A0A0A"/><rect x="89" y="252" width="12" height="14" fill="#0A0A0A"/><rect x="105" y="252" width="12" height="14" fill="#0A0A0A"/><rect x="121" y="252" width="12" height="14" fill="#0A0A0A"/><rect x="137" y="252" width="12" height="14" fill="#0A0A0A"/>
+    <rect x="73" y="272" width="12" height="14" fill="#0A0A0A"/><rect x="89" y="272" width="12" height="14" fill="#0A0A0A"/><rect x="105" y="272" width="12" height="14" fill="#0A0A0A"/><rect x="121" y="272" width="12" height="14" fill="#0A0A0A"/><rect x="137" y="272" width="12" height="14" fill="#0A0A0A"/>
+    <rect x="73" y="292" width="12" height="14" fill="#0A0A0A"/><rect x="89" y="292" width="12" height="14" fill="#0A0A0A"/><rect x="105" y="292" width="12" height="14" fill="#0A0A0A"/><rect x="121" y="292" width="12" height="14" fill="#0A0A0A"/><rect x="137" y="292" width="12" height="14" fill="#0A0A0A"/>
+    <rect x="73" y="312" width="12" height="14" fill="#0A0A0A"/><rect x="89" y="312" width="12" height="14" fill="#0A0A0A"/><rect x="105" y="312" width="12" height="14" fill="#0A0A0A"/><rect x="121" y="312" width="12" height="14" fill="#0A0A0A"/><rect x="137" y="312" width="12" height="14" fill="#0A0A0A"/>
+    <rect x="73" y="332" width="12" height="14" fill="#0A0A0A"/><rect x="89" y="332" width="12" height="14" fill="#0A0A0A"/><rect x="105" y="332" width="12" height="14" fill="#0A0A0A"/><rect x="121" y="332" width="12" height="14" fill="#0A0A0A"/><rect x="137" y="332" width="12" height="14" fill="#0A0A0A"/>
+    <!-- швы панелей -->
+    <line x1="70" y1="245" x2="160" y2="245" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="70" y1="268" x2="160" y2="268" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="70" y1="291" x2="160" y2="291" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="70" y1="314" x2="160" y2="314" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="115" y1="220" x2="115" y2="400" stroke="#0A0A0A" stroke-width="1"/>
+
+    <rect x="168" y="180" width="110" height="220" fill="#EAEAEA"/>
+    <rect x="171" y="193" width="14" height="16" fill="#0A0A0A"/><rect x="190" y="193" width="14" height="16" fill="#0A0A0A"/><rect x="209" y="193" width="14" height="16" fill="#0A0A0A"/><rect x="228" y="193" width="14" height="16" fill="#0A0A0A"/><rect x="247" y="193" width="14" height="16" fill="#0A0A0A"/>
+    <rect x="171" y="215" width="14" height="16" fill="#0A0A0A"/><rect x="190" y="215" width="14" height="16" fill="#0A0A0A"/><rect x="209" y="215" width="14" height="16" fill="#0A0A0A"/><rect x="228" y="215" width="14" height="16" fill="#0A0A0A"/><rect x="247" y="215" width="14" height="16" fill="#0A0A0A"/>
+    <rect x="171" y="237" width="14" height="16" fill="#0A0A0A"/><rect x="190" y="237" width="14" height="16" fill="#0A0A0A"/><rect x="209" y="237" width="14" height="16" fill="#0A0A0A"/><rect x="228" y="237" width="14" height="16" fill="#0A0A0A"/><rect x="247" y="237" width="14" height="16" fill="#0A0A0A"/>
+    <rect x="171" y="259" width="14" height="16" fill="#0A0A0A"/><rect x="190" y="259" width="14" height="16" fill="#0A0A0A"/><rect x="209" y="259" width="14" height="16" fill="#0A0A0A"/><rect x="228" y="259" width="14" height="16" fill="#0A0A0A"/><rect x="247" y="259" width="14" height="16" fill="#0A0A0A"/>
+    <rect x="171" y="281" width="14" height="16" fill="#0A0A0A"/><rect x="190" y="281" width="14" height="16" fill="#0A0A0A"/><rect x="209" y="281" width="14" height="16" fill="#0A0A0A"/><rect x="228" y="281" width="14" height="16" fill="#0A0A0A"/><rect x="247" y="281" width="14" height="16" fill="#0A0A0A"/>
+    <rect x="171" y="303" width="14" height="16" fill="#0A0A0A"/><rect x="190" y="303" width="14" height="16" fill="#0A0A0A"/><rect x="209" y="303" width="14" height="16" fill="#0A0A0A"/><rect x="228" y="303" width="14" height="16" fill="#0A0A0A"/><rect x="247" y="303" width="14" height="16" fill="#0A0A0A"/>
+    <rect x="171" y="325" width="14" height="16" fill="#0A0A0A"/><rect x="190" y="325" width="14" height="16" fill="#0A0A0A"/><rect x="209" y="325" width="14" height="16" fill="#0A0A0A"/><rect x="228" y="325" width="14" height="16" fill="#0A0A0A"/><rect x="247" y="325" width="14" height="16" fill="#0A0A0A"/>
+    <rect x="171" y="347" width="14" height="16" fill="#0A0A0A"/><rect x="190" y="347" width="14" height="16" fill="#0A0A0A"/><rect x="209" y="347" width="14" height="16" fill="#0A0A0A"/><rect x="228" y="347" width="14" height="16" fill="#0A0A0A"/><rect x="247" y="347" width="14" height="16" fill="#0A0A0A"/>
+    <line x1="168" y1="210" x2="278" y2="210" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="168" y1="233" x2="278" y2="233" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="168" y1="256" x2="278" y2="256" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="168" y1="279" x2="278" y2="279" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="168" y1="302" x2="278" y2="302" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="168" y1="325" x2="278" y2="325" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="168" y1="348" x2="278" y2="348" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="223" y1="180" x2="223" y2="400" stroke="#0A0A0A" stroke-width="1"/>
+
+    <!-- Труба -->
+    <rect x="250" y="150" width="10" height="30" fill="#EAEAEA"/>
+
+    <rect x="288" y="240" width="80" height="160" fill="#EAEAEA"/>
+    <rect x="291" y="252" width="11" height="13" fill="#0A0A0A"/><rect x="307" y="252" width="11" height="13" fill="#0A0A0A"/><rect x="323" y="252" width="11" height="13" fill="#0A0A0A"/><rect x="339" y="252" width="11" height="13" fill="#0A0A0A"/>
+    <rect x="291" y="271" width="11" height="13" fill="#0A0A0A"/><rect x="307" y="271" width="11" height="13" fill="#0A0A0A"/><rect x="323" y="271" width="11" height="13" fill="#0A0A0A"/><rect x="339" y="271" width="11" height="13" fill="#0A0A0A"/>
+    <rect x="291" y="290" width="11" height="13" fill="#0A0A0A"/><rect x="307" y="290" width="11" height="13" fill="#0A0A0A"/><rect x="323" y="290" width="11" height="13" fill="#0A0A0A"/><rect x="339" y="290" width="11" height="13" fill="#0A0A0A"/>
+    <rect x="291" y="309" width="11" height="13" fill="#0A0A0A"/><rect x="307" y="309" width="11" height="13" fill="#0A0A0A"/><rect x="323" y="309" width="11" height="13" fill="#0A0A0A"/><rect x="339" y="309" width="11" height="13" fill="#0A0A0A"/>
+    <rect x="291" y="328" width="11" height="13" fill="#0A0A0A"/><rect x="307" y="328" width="11" height="13" fill="#0A0A0A"/><rect x="323" y="328" width="11" height="13" fill="#0A0A0A"/><rect x="339" y="328" width="11" height="13" fill="#0A0A0A"/>
+    <line x1="288" y1="268" x2="368" y2="268" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="288" y1="287" x2="368" y2="287" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="288" y1="306" x2="368" y2="306" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="288" y1="325" x2="368" y2="325" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="328" y1="240" x2="328" y2="400" stroke="#0A0A0A" stroke-width="1"/>
+
+    <!-- Большой 9-этажный дом по центру -->
+    <rect x="380" y="100" width="160" height="300" fill="#EAEAEA"/>
+    <rect x="383" y="113" width="18" height="20" fill="#0A0A0A"/><rect x="406" y="113" width="18" height="20" fill="#0A0A0A"/><rect x="429" y="113" width="18" height="20" fill="#0A0A0A"/><rect x="452" y="113" width="18" height="20" fill="#0A0A0A"/><rect x="475" y="113" width="18" height="20" fill="#0A0A0A"/><rect x="498" y="113" width="18" height="20" fill="#0A0A0A"/>
+    <rect x="383" y="139" width="18" height="20" fill="#0A0A0A"/><rect x="406" y="139" width="18" height="20" fill="#0A0A0A"/><rect x="429" y="139" width="18" height="20" fill="#0A0A0A"/><rect x="452" y="139" width="18" height="20" fill="#0A0A0A"/><rect x="475" y="139" width="18" height="20" fill="#0A0A0A"/><rect x="498" y="139" width="18" height="20" fill="#0A0A0A"/>
+    <rect x="383" y="165" width="18" height="20" fill="#0A0A0A"/><rect x="406" y="165" width="18" height="20" fill="#0A0A0A"/><rect x="429" y="165" width="18" height="20" fill="#0A0A0A"/><rect x="452" y="165" width="18" height="20" fill="#0A0A0A"/><rect x="475" y="165" width="18" height="20" fill="#0A0A0A"/><rect x="498" y="165" width="18" height="20" fill="#0A0A0A"/>
+    <rect x="383" y="191" width="18" height="20" fill="#0A0A0A"/><rect x="406" y="191" width="18" height="20" fill="#0A0A0A"/><rect x="429" y="191" width="18" height="20" fill="#0A0A0A"/><rect x="452" y="191" width="18" height="20" fill="#0A0A0A"/><rect x="475" y="191" width="18" height="20" fill="#0A0A0A"/><rect x="498" y="191" width="18" height="20" fill="#0A0A0A"/>
+    <rect x="383" y="217" width="18" height="20" fill="#0A0A0A"/><rect x="406" y="217" width="18" height="20" fill="#0A0A0A"/><rect x="429" y="217" width="18" height="20" fill="#0A0A0A"/><rect x="452" y="217" width="18" height="20" fill="#0A0A0A"/><rect x="475" y="217" width="18" height="20" fill="#0A0A0A"/><rect x="498" y="217" width="18" height="20" fill="#0A0A0A"/>
+    <rect x="383" y="243" width="18" height="20" fill="#0A0A0A"/><rect x="406" y="243" width="18" height="20" fill="#0A0A0A"/><rect x="429" y="243" width="18" height="20" fill="#0A0A0A"/><rect x="452" y="243" width="18" height="20" fill="#0A0A0A"/><rect x="475" y="243" width="18" height="20" fill="#0A0A0A"/><rect x="498" y="243" width="18" height="20" fill="#0A0A0A"/>
+    <rect x="383" y="269" width="18" height="20" fill="#0A0A0A"/><rect x="406" y="269" width="18" height="20" fill="#0A0A0A"/><rect x="429" y="269" width="18" height="20" fill="#0A0A0A"/><rect x="452" y="269" width="18" height="20" fill="#0A0A0A"/><rect x="475" y="269" width="18" height="20" fill="#0A0A0A"/><rect x="498" y="269" width="18" height="20" fill="#0A0A0A"/>
+    <rect x="383" y="295" width="18" height="20" fill="#0A0A0A"/><rect x="406" y="295" width="18" height="20" fill="#0A0A0A"/><rect x="429" y="295" width="18" height="20" fill="#0A0A0A"/><rect x="452" y="295" width="18" height="20" fill="#0A0A0A"/><rect x="475" y="295" width="18" height="20" fill="#0A0A0A"/><rect x="498" y="295" width="18" height="20" fill="#0A0A0A"/>
+    <rect x="383" y="321" width="18" height="20" fill="#0A0A0A"/><rect x="406" y="321" width="18" height="20" fill="#0A0A0A"/><rect x="429" y="321" width="18" height="20" fill="#0A0A0A"/><rect x="452" y="321" width="18" height="20" fill="#0A0A0A"/><rect x="475" y="321" width="18" height="20" fill="#0A0A0A"/><rect x="498" y="321" width="18" height="20" fill="#0A0A0A"/>
+    <line x1="380" y1="133" x2="540" y2="133" stroke="#0A0A0A" stroke-width="1.5"/>
+    <line x1="380" y1="159" x2="540" y2="159" stroke="#0A0A0A" stroke-width="1.5"/>
+    <line x1="380" y1="185" x2="540" y2="185" stroke="#0A0A0A" stroke-width="1.5"/>
+    <line x1="380" y1="211" x2="540" y2="211" stroke="#0A0A0A" stroke-width="1.5"/>
+    <line x1="380" y1="237" x2="540" y2="237" stroke="#0A0A0A" stroke-width="1.5"/>
+    <line x1="380" y1="263" x2="540" y2="263" stroke="#0A0A0A" stroke-width="1.5"/>
+    <line x1="380" y1="289" x2="540" y2="289" stroke="#0A0A0A" stroke-width="1.5"/>
+    <line x1="380" y1="315" x2="540" y2="315" stroke="#0A0A0A" stroke-width="1.5"/>
+    <line x1="460" y1="100" x2="460" y2="400" stroke="#0A0A0A" stroke-width="1.5"/>
+    <!-- Технический этаж -->
+    <rect x="380" y="93" width="160" height="10" fill="#EAEAEA"/>
+    <rect x="395" y="85" width="6" height="8" fill="#EAEAEA"/>
+    <rect x="410" y="80" width="6" height="13" fill="#EAEAEA"/>
+    <rect x="520" y="80" width="6" height="20" fill="#EAEAEA"/>
+
+    <!-- Правая часть -->
+    <rect x="550" y="190" width="120" height="210" fill="#EAEAEA"/>
+    <rect x="553" y="203" width="16" height="18" fill="#0A0A0A"/><rect x="574" y="203" width="16" height="18" fill="#0A0A0A"/><rect x="595" y="203" width="16" height="18" fill="#0A0A0A"/><rect x="616" y="203" width="16" height="18" fill="#0A0A0A"/><rect x="637" y="203" width="16" height="18" fill="#0A0A0A"/>
+    <rect x="553" y="227" width="16" height="18" fill="#0A0A0A"/><rect x="574" y="227" width="16" height="18" fill="#0A0A0A"/><rect x="595" y="227" width="16" height="18" fill="#0A0A0A"/><rect x="616" y="227" width="16" height="18" fill="#0A0A0A"/><rect x="637" y="227" width="16" height="18" fill="#0A0A0A"/>
+    <rect x="553" y="251" width="16" height="18" fill="#0A0A0A"/><rect x="574" y="251" width="16" height="18" fill="#0A0A0A"/><rect x="595" y="251" width="16" height="18" fill="#0A0A0A"/><rect x="616" y="251" width="16" height="18" fill="#0A0A0A"/><rect x="637" y="251" width="16" height="18" fill="#0A0A0A"/>
+    <rect x="553" y="275" width="16" height="18" fill="#0A0A0A"/><rect x="574" y="275" width="16" height="18" fill="#0A0A0A"/><rect x="595" y="275" width="16" height="18" fill="#0A0A0A"/><rect x="616" y="275" width="16" height="18" fill="#0A0A0A"/><rect x="637" y="275" width="16" height="18" fill="#0A0A0A"/>
+    <rect x="553" y="299" width="16" height="18" fill="#0A0A0A"/><rect x="574" y="299" width="16" height="18" fill="#0A0A0A"/><rect x="595" y="299" width="16" height="18" fill="#0A0A0A"/><rect x="616" y="299" width="16" height="18" fill="#0A0A0A"/><rect x="637" y="299" width="16" height="18" fill="#0A0A0A"/>
+    <rect x="553" y="323" width="16" height="18" fill="#0A0A0A"/><rect x="574" y="323" width="16" height="18" fill="#0A0A0A"/><rect x="595" y="323" width="16" height="18" fill="#0A0A0A"/><rect x="616" y="323" width="16" height="18" fill="#0A0A0A"/><rect x="637" y="323" width="16" height="18" fill="#0A0A0A"/>
+    <rect x="553" y="347" width="16" height="18" fill="#0A0A0A"/><rect x="574" y="347" width="16" height="18" fill="#0A0A0A"/><rect x="595" y="347" width="16" height="18" fill="#0A0A0A"/><rect x="616" y="347" width="16" height="18" fill="#0A0A0A"/><rect x="637" y="347" width="16" height="18" fill="#0A0A0A"/>
+    <rect x="553" y="371" width="16" height="18" fill="#0A0A0A"/><rect x="574" y="371" width="16" height="18" fill="#0A0A0A"/><rect x="595" y="371" width="16" height="18" fill="#0A0A0A"/><rect x="616" y="371" width="16" height="18" fill="#0A0A0A"/><rect x="637" y="371" width="16" height="18" fill="#0A0A0A"/>
+    <line x1="550" y1="221" x2="670" y2="221" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="550" y1="245" x2="670" y2="245" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="550" y1="269" x2="670" y2="269" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="550" y1="293" x2="670" y2="293" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="550" y1="317" x2="670" y2="317" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="550" y1="341" x2="670" y2="341" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="550" y1="365" x2="670" y2="365" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="610" y1="190" x2="610" y2="400" stroke="#0A0A0A" stroke-width="1"/>
+
+    <rect x="680" y="150" width="130" height="250" fill="#EAEAEA"/>
+    <rect x="683" y="163" width="17" height="19" fill="#0A0A0A"/><rect x="705" y="163" width="17" height="19" fill="#0A0A0A"/><rect x="727" y="163" width="17" height="19" fill="#0A0A0A"/><rect x="749" y="163" width="17" height="19" fill="#0A0A0A"/><rect x="771" y="163" width="17" height="19" fill="#0A0A0A"/>
+    <rect x="683" y="188" width="17" height="19" fill="#0A0A0A"/><rect x="705" y="188" width="17" height="19" fill="#0A0A0A"/><rect x="727" y="188" width="17" height="19" fill="#0A0A0A"/><rect x="749" y="188" width="17" height="19" fill="#0A0A0A"/><rect x="771" y="188" width="17" height="19" fill="#0A0A0A"/>
+    <rect x="683" y="213" width="17" height="19" fill="#0A0A0A"/><rect x="705" y="213" width="17" height="19" fill="#0A0A0A"/><rect x="727" y="213" width="17" height="19" fill="#0A0A0A"/><rect x="749" y="213" width="17" height="19" fill="#0A0A0A"/><rect x="771" y="213" width="17" height="19" fill="#0A0A0A"/>
+    <rect x="683" y="238" width="17" height="19" fill="#0A0A0A"/><rect x="705" y="238" width="17" height="19" fill="#0A0A0A"/><rect x="727" y="238" width="17" height="19" fill="#0A0A0A"/><rect x="749" y="238" width="17" height="19" fill="#0A0A0A"/><rect x="771" y="238" width="17" height="19" fill="#0A0A0A"/>
+    <rect x="683" y="263" width="17" height="19" fill="#0A0A0A"/><rect x="705" y="263" width="17" height="19" fill="#0A0A0A"/><rect x="727" y="263" width="17" height="19" fill="#0A0A0A"/><rect x="749" y="263" width="17" height="19" fill="#0A0A0A"/><rect x="771" y="263" width="17" height="19" fill="#0A0A0A"/>
+    <rect x="683" y="288" width="17" height="19" fill="#0A0A0A"/><rect x="705" y="288" width="17" height="19" fill="#0A0A0A"/><rect x="727" y="288" width="17" height="19" fill="#0A0A0A"/><rect x="749" y="288" width="17" height="19" fill="#0A0A0A"/><rect x="771" y="288" width="17" height="19" fill="#0A0A0A"/>
+    <rect x="683" y="313" width="17" height="19" fill="#0A0A0A"/><rect x="705" y="313" width="17" height="19" fill="#0A0A0A"/><rect x="727" y="313" width="17" height="19" fill="#0A0A0A"/><rect x="749" y="313" width="17" height="19" fill="#0A0A0A"/><rect x="771" y="313" width="17" height="19" fill="#0A0A0A"/>
+    <rect x="683" y="338" width="17" height="19" fill="#0A0A0A"/><rect x="705" y="338" width="17" height="19" fill="#0A0A0A"/><rect x="727" y="338" width="17" height="19" fill="#0A0A0A"/><rect x="749" y="338" width="17" height="19" fill="#0A0A0A"/><rect x="771" y="338" width="17" height="19" fill="#0A0A0A"/>
+    <rect x="683" y="363" width="17" height="19" fill="#0A0A0A"/><rect x="705" y="363" width="17" height="19" fill="#0A0A0A"/><rect x="727" y="363" width="17" height="19" fill="#0A0A0A"/><rect x="749" y="363" width="17" height="19" fill="#0A0A0A"/><rect x="771" y="363" width="17" height="19" fill="#0A0A0A"/>
+    <line x1="680" y1="182" x2="810" y2="182" stroke="#0A0A0A" stroke-width="1.5"/>
+    <line x1="680" y1="207" x2="810" y2="207" stroke="#0A0A0A" stroke-width="1.5"/>
+    <line x1="680" y1="232" x2="810" y2="232" stroke="#0A0A0A" stroke-width="1.5"/>
+    <line x1="680" y1="257" x2="810" y2="257" stroke="#0A0A0A" stroke-width="1.5"/>
+    <line x1="680" y1="282" x2="810" y2="282" stroke="#0A0A0A" stroke-width="1.5"/>
+    <line x1="680" y1="307" x2="810" y2="307" stroke="#0A0A0A" stroke-width="1.5"/>
+    <line x1="680" y1="332" x2="810" y2="332" stroke="#0A0A0A" stroke-width="1.5"/>
+    <line x1="680" y1="357" x2="810" y2="357" stroke="#0A0A0A" stroke-width="1.5"/>
+    <line x1="745" y1="150" x2="745" y2="400" stroke="#0A0A0A" stroke-width="1.5"/>
+
+    <rect x="820" y="210" width="95" height="190" fill="#EAEAEA"/>
+    <rect x="823" y="222" width="13" height="15" fill="#0A0A0A"/><rect x="840" y="222" width="13" height="15" fill="#0A0A0A"/><rect x="857" y="222" width="13" height="15" fill="#0A0A0A"/><rect x="874" y="222" width="13" height="15" fill="#0A0A0A"/><rect x="891" y="222" width="13" height="15" fill="#0A0A0A"/>
+    <rect x="823" y="243" width="13" height="15" fill="#0A0A0A"/><rect x="840" y="243" width="13" height="15" fill="#0A0A0A"/><rect x="857" y="243" width="13" height="15" fill="#0A0A0A"/><rect x="874" y="243" width="13" height="15" fill="#0A0A0A"/><rect x="891" y="243" width="13" height="15" fill="#0A0A0A"/>
+    <rect x="823" y="264" width="13" height="15" fill="#0A0A0A"/><rect x="840" y="264" width="13" height="15" fill="#0A0A0A"/><rect x="857" y="264" width="13" height="15" fill="#0A0A0A"/><rect x="874" y="264" width="13" height="15" fill="#0A0A0A"/><rect x="891" y="264" width="13" height="15" fill="#0A0A0A"/>
+    <rect x="823" y="285" width="13" height="15" fill="#0A0A0A"/><rect x="840" y="285" width="13" height="15" fill="#0A0A0A"/><rect x="857" y="285" width="13" height="15" fill="#0A0A0A"/><rect x="874" y="285" width="13" height="15" fill="#0A0A0A"/><rect x="891" y="285" width="13" height="15" fill="#0A0A0A"/>
+    <rect x="823" y="306" width="13" height="15" fill="#0A0A0A"/><rect x="840" y="306" width="13" height="15" fill="#0A0A0A"/><rect x="857" y="306" width="13" height="15" fill="#0A0A0A"/><rect x="874" y="306" width="13" height="15" fill="#0A0A0A"/><rect x="891" y="306" width="13" height="15" fill="#0A0A0A"/>
+    <rect x="823" y="327" width="13" height="15" fill="#0A0A0A"/><rect x="840" y="327" width="13" height="15" fill="#0A0A0A"/><rect x="857" y="327" width="13" height="15" fill="#0A0A0A"/><rect x="874" y="327" width="13" height="15" fill="#0A0A0A"/><rect x="891" y="327" width="13" height="15" fill="#0A0A0A"/>
+    <rect x="823" y="348" width="13" height="15" fill="#0A0A0A"/><rect x="840" y="348" width="13" height="15" fill="#0A0A0A"/><rect x="857" y="348" width="13" height="15" fill="#0A0A0A"/><rect x="874" y="348" width="13" height="15" fill="#0A0A0A"/><rect x="891" y="348" width="13" height="15" fill="#0A0A0A"/>
+    <line x1="820" y1="237" x2="915" y2="237" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="820" y1="258" x2="915" y2="258" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="820" y1="279" x2="915" y2="279" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="820" y1="300" x2="915" y2="300" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="820" y1="321" x2="915" y2="321" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="820" y1="342" x2="915" y2="342" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="820" y1="363" x2="915" y2="363" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="867" y1="210" x2="867" y2="400" stroke="#0A0A0A" stroke-width="1"/>
+
+    <rect x="925" y="260" width="75" height="140" fill="#EAEAEA"/>
+    <rect x="928" y="272" width="10" height="12" fill="#0A0A0A"/><rect x="943" y="272" width="10" height="12" fill="#0A0A0A"/><rect x="958" y="272" width="10" height="12" fill="#0A0A0A"/><rect x="973" y="272" width="10" height="12" fill="#0A0A0A"/><rect x="983" y="272" width="10" height="12" fill="#0A0A0A"/>
+    <rect x="928" y="290" width="10" height="12" fill="#0A0A0A"/><rect x="943" y="290" width="10" height="12" fill="#0A0A0A"/><rect x="958" y="290" width="10" height="12" fill="#0A0A0A"/><rect x="973" y="290" width="10" height="12" fill="#0A0A0A"/>
+    <rect x="928" y="308" width="10" height="12" fill="#0A0A0A"/><rect x="943" y="308" width="10" height="12" fill="#0A0A0A"/><rect x="958" y="308" width="10" height="12" fill="#0A0A0A"/><rect x="973" y="308" width="10" height="12" fill="#0A0A0A"/>
+    <rect x="928" y="326" width="10" height="12" fill="#0A0A0A"/><rect x="943" y="326" width="10" height="12" fill="#0A0A0A"/><rect x="958" y="326" width="10" height="12" fill="#0A0A0A"/><rect x="973" y="326" width="10" height="12" fill="#0A0A0A"/>
+    <rect x="928" y="344" width="10" height="12" fill="#0A0A0A"/><rect x="943" y="344" width="10" height="12" fill="#0A0A0A"/><rect x="958" y="344" width="10" height="12" fill="#0A0A0A"/><rect x="973" y="344" width="10" height="12" fill="#0A0A0A"/>
+    <line x1="925" y1="284" x2="1000" y2="284" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="925" y1="302" x2="1000" y2="302" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="925" y1="320" x2="1000" y2="320" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="925" y1="338" x2="1000" y2="338" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="962" y1="260" x2="962" y2="400" stroke="#0A0A0A" stroke-width="1"/>
+
+    <rect x="1010" y="230" width="100" height="170" fill="#EAEAEA"/>
+    <rect x="1013" y="243" width="14" height="16" fill="#0A0A0A"/><rect x="1031" y="243" width="14" height="16" fill="#0A0A0A"/><rect x="1049" y="243" width="14" height="16" fill="#0A0A0A"/><rect x="1067" y="243" width="14" height="16" fill="#0A0A0A"/><rect x="1085" y="243" width="14" height="16" fill="#0A0A0A"/>
+    <rect x="1013" y="265" width="14" height="16" fill="#0A0A0A"/><rect x="1031" y="265" width="14" height="16" fill="#0A0A0A"/><rect x="1049" y="265" width="14" height="16" fill="#0A0A0A"/><rect x="1067" y="265" width="14" height="16" fill="#0A0A0A"/><rect x="1085" y="265" width="14" height="16" fill="#0A0A0A"/>
+    <rect x="1013" y="287" width="14" height="16" fill="#0A0A0A"/><rect x="1031" y="287" width="14" height="16" fill="#0A0A0A"/><rect x="1049" y="287" width="14" height="16" fill="#0A0A0A"/><rect x="1067" y="287" width="14" height="16" fill="#0A0A0A"/><rect x="1085" y="287" width="14" height="16" fill="#0A0A0A"/>
+    <rect x="1013" y="309" width="14" height="16" fill="#0A0A0A"/><rect x="1031" y="309" width="14" height="16" fill="#0A0A0A"/><rect x="1049" y="309" width="14" height="16" fill="#0A0A0A"/><rect x="1067" y="309" width="14" height="16" fill="#0A0A0A"/><rect x="1085" y="309" width="14" height="16" fill="#0A0A0A"/>
+    <rect x="1013" y="331" width="14" height="16" fill="#0A0A0A"/><rect x="1031" y="331" width="14" height="16" fill="#0A0A0A"/><rect x="1049" y="331" width="14" height="16" fill="#0A0A0A"/><rect x="1067" y="331" width="14" height="16" fill="#0A0A0A"/><rect x="1085" y="331" width="14" height="16" fill="#0A0A0A"/>
+    <rect x="1013" y="353" width="14" height="16" fill="#0A0A0A"/><rect x="1031" y="353" width="14" height="16" fill="#0A0A0A"/><rect x="1049" y="353" width="14" height="16" fill="#0A0A0A"/><rect x="1067" y="353" width="14" height="16" fill="#0A0A0A"/><rect x="1085" y="353" width="14" height="16" fill="#0A0A0A"/>
+    <rect x="1013" y="375" width="14" height="16" fill="#0A0A0A"/><rect x="1031" y="375" width="14" height="16" fill="#0A0A0A"/><rect x="1049" y="375" width="14" height="16" fill="#0A0A0A"/><rect x="1067" y="375" width="14" height="16" fill="#0A0A0A"/><rect x="1085" y="375" width="14" height="16" fill="#0A0A0A"/>
+    <line x1="1010" y1="259" x2="1110" y2="259" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="1010" y1="281" x2="1110" y2="281" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="1010" y1="303" x2="1110" y2="303" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="1010" y1="325" x2="1110" y2="325" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="1010" y1="347" x2="1110" y2="347" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="1010" y1="369" x2="1110" y2="369" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="1060" y1="230" x2="1060" y2="400" stroke="#0A0A0A" stroke-width="1"/>
+
+    <rect x="1120" y="270" width="80" height="130" fill="#EAEAEA"/>
+    <rect x="1123" y="282" width="11" height="13" fill="#0A0A0A"/><rect x="1139" y="282" width="11" height="13" fill="#0A0A0A"/><rect x="1155" y="282" width="11" height="13" fill="#0A0A0A"/><rect x="1171" y="282" width="11" height="13" fill="#0A0A0A"/>
+    <rect x="1123" y="301" width="11" height="13" fill="#0A0A0A"/><rect x="1139" y="301" width="11" height="13" fill="#0A0A0A"/><rect x="1155" y="301" width="11" height="13" fill="#0A0A0A"/><rect x="1171" y="301" width="11" height="13" fill="#0A0A0A"/>
+    <rect x="1123" y="320" width="11" height="13" fill="#0A0A0A"/><rect x="1139" y="320" width="11" height="13" fill="#0A0A0A"/><rect x="1155" y="320" width="11" height="13" fill="#0A0A0A"/><rect x="1171" y="320" width="11" height="13" fill="#0A0A0A"/>
+    <rect x="1123" y="339" width="11" height="13" fill="#0A0A0A"/><rect x="1139" y="339" width="11" height="13" fill="#0A0A0A"/><rect x="1155" y="339" width="11" height="13" fill="#0A0A0A"/><rect x="1171" y="339" width="11" height="13" fill="#0A0A0A"/>
+    <rect x="1123" y="358" width="11" height="13" fill="#0A0A0A"/><rect x="1139" y="358" width="11" height="13" fill="#0A0A0A"/><rect x="1155" y="358" width="11" height="13" fill="#0A0A0A"/><rect x="1171" y="358" width="11" height="13" fill="#0A0A0A"/>
+    <line x1="1120" y1="295" x2="1200" y2="295" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="1120" y1="314" x2="1200" y2="314" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="1120" y1="333" x2="1200" y2="333" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="1120" y1="352" x2="1200" y2="352" stroke="#0A0A0A" stroke-width="1"/>
+    <line x1="1160" y1="270" x2="1160" y2="400" stroke="#0A0A0A" stroke-width="1"/>
+
+    <!-- Горизонтальная земля -->
+    <line x1="0" y1="399" x2="1200" y2="399" stroke="#EAEAEA" stroke-width="2"/>
+  </svg>
   <div class="hero-line h"></div>
   <div class="hero-line h2"></div>
 
@@ -842,7 +1123,7 @@ footer {
     <span class="marquee-item">ЦИФРОВОЙ СЛЕДОВАТЕЛЬ<span>//</span></span>
     <span class="marquee-item">BLUE TEAM OPS<span>//</span></span>
     <span class="marquee-item">RED TEAM ANALYSIS<span>//</span></span>
-    <span class="marquee-item">КОНТР-КУЛЬТУРА OSINT<span>//</span></span>
+    <span class="marquee-item">COOPERATION WITH AUTHORITIES<span>//</span></span>
     <span class="marquee-item">WEB DEVELOPMENT<span>//</span></span>
     <!-- дубль для seamless loop -->
     <span class="marquee-item">OSINT_LEAGUE<span>//</span></span>
@@ -851,7 +1132,7 @@ footer {
     <span class="marquee-item">ЦИФРОВОЙ СЛЕДОВАТЕЛЬ<span>//</span></span>
     <span class="marquee-item">BLUE TEAM OPS<span>//</span></span>
     <span class="marquee-item">RED TEAM ANALYSIS<span>//</span></span>
-    <span class="marquee-item">КОНТР-КУЛЬТУРА OSINT<span>//</span></span>
+    <span class="marquee-item">COOPERATION WITH AUTHORITIES<span>//</span></span>
     <span class="marquee-item">WEB DEVELOPMENT<span>//</span></span>
   </div>
 </div>
@@ -914,13 +1195,13 @@ footer {
 
   <div class="osint-banner">
     <p>
-      Наполовину являюсь последователем Контр-Культуры OSINT — движения, которое ставит под сомнение
-      стандартные методологии и ищет нестандартные векторы сбора и анализа информации.
-      Информация существует — её просто нужно уметь видеть.
+      Всегда готова к сотрудничеству со спецслужбами — передача данных, содействие в расследованиях,
+      совместная работа по профилю OSINT / HUMINT / FINSINT. Если информация помогает защитить людей —
+      её нужно передавать тем, кто умеет с ней работать.
     </p>
   </div>
 
-  <div class="counter-badge">[ КОНТР-КУЛЬТУРА OSINT // 50% ]</div>
+  <div class="counter-badge">[ COOPERATION // OPEN ]</div>
 </section>
 
 <!-- ========== CTF / КОМАНДА ========== -->
@@ -1010,6 +1291,19 @@ footer {
 </footer>
 
 <script>
+// Click-triggered glitch on nickname
+const glitchEl = document.querySelector('.glitch');
+const glitchWrap = document.querySelector('.glitch-wrap');
+if (glitchEl && glitchWrap) {
+  glitchWrap.addEventListener('click', function() {
+    if (glitchEl.classList.contains('forced')) return;
+    glitchEl.classList.add('forced');
+    setTimeout(() => {
+      glitchEl.classList.remove('forced');
+    }, 520);
+  });
+}
+
 // Clock
 function updateClock() {
   const now = new Date();
@@ -1086,5 +1380,3 @@ typeNext();
 
 </body>
 </html>
-
-
